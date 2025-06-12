@@ -1,14 +1,4 @@
-ami-09c813fb71547fc4f
-
-sg-02ee33accb91fcb0a
-
-Z09863983SQIUX9
-
-dineskonda.site
-
-
 #!/bin/bash
-
 AMI_ID="ami-09c813fb71547fc4f"
 SG_ID="sg-02ee33accb91fcb0a" # replace with your SG ID
 INSTANCES=("mongodb" "redis" "mysql" "rabbitmq" "catalogue" "user" "cart" "shipping" "payment" "dispatch" "frontend")
