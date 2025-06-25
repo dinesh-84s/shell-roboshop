@@ -81,7 +81,7 @@ cp $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongo.repo
 dnf install mongodb-mongosh -y &>>$LOG_FILE
 VALIDATE $? "Installing mongodb client"
 
-STATUS=$(mongosh --host mongodb.dineshkonda.site --eval 'db.getMongo().getDBNames().indexOf("catalogue")'
+STATUS=$(mongosh --host mongodb.dineshkonda.site --eval 'db.getMongo().getDBNames().indexOf('catalogue')'
 if [ $STATUS -ne 1 ]
 then 
 
