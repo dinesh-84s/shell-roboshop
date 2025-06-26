@@ -2,7 +2,7 @@
 
 AMI_ID="ami-09c813fb71547fc4f"
 SG_ID="sg-02ee33accb91fcb0a" # replace with your SG ID
-INSTANCES=("mongodb")
+INSTANCES=("catalogue" "mysql" "mongodb")
 ZONE_ID="Z09863983SQIUX95E67RN" # replace with your ZONE ID
 DOMAIN_NAME="dineshkonda.site" # replace with your domain
 
