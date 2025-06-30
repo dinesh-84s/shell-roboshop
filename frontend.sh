@@ -34,7 +34,6 @@ else
 fi
 }
 
-
 dnf module disable nginx -y &>>$LOG_FILE
 VALIDATE $? "Disabling the default nginx"
 
@@ -43,7 +42,6 @@ VALIDATE $? "Enabling the nginx 1.24"
 
 dnf install nginx -y &>>$LOG_FILE
 VALIDATE $? "Installing Nginx"
-
 
 systemctl enable nginx &>>$LOG_FILE
 systemctl start nginx 
