@@ -37,7 +37,7 @@ fi
 dnf install python3 gcc python3-devel -y $>>$LOG_FILE
 VALIDATE $? "Installing python3 packages"
 
-id roboshop
+id roboshop  $>>$LOG_FILE
 if [ $? -ne 0 ]
 then
    
