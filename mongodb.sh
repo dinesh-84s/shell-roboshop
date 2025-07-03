@@ -8,6 +8,7 @@ N="\e[0m"
 LOGS_FOLDER="/var/log/roboshop-logs"
 SCRIPT_NAME=$(echo $0 | cut -d "." -f1)
 LOG_FILE="$LOGS_FOLDER/$SCRIPT_NAME.log"
+SCRIPT_DIR=$PWD
 
 mkdir -p $LOGS_FOLDER
 echo "Script started executing at: $(date)" | tee -a $LOG_FILE
@@ -32,20 +33,56 @@ VALIDATE(){
     fi
 }
 
-cp mongo.repo /etc/yum.repos.d/mongodb.repo
-VALIDATE $? "Copying MongoDB repo"
+dnf module disable nodejs -y &>>$LOG_FILE
+VALIDATE $? "Disabling default nodejs"
 
-dnf install mongodb-org -y &>>$LOG_FILE
-VALIDATE $? "Installing mongodb server"
+dnf module enable nodejs:20 -y &>>$LOG_FILE
+VALIDATE $? "Enabling nodejs:20"
 
-systemctl enable mongod &>>$LOG_FILE
-VALIDATE $? "Enabling MongoDB"
+dnf install nodejs -y &>>$LOG_FILE
+VALIDATE $? "Installing nodejs:20"
 
-systemctl start mongod &>>$LOG_FILE
-VALIDATE $? "Starting MongoDB"
+id roboshop
+if [ $? -ne 0 ]
+then
+    useradd --system --home /app --shell /sbin/nologin --comment "roboshop system user" roboshop &>>$LOG_FILE
+    VALIDATE $? "Creating roboshop system user"
+else
+    echo -e "System user roboshop already created ... $Y SKIPPING $N"
+fi
 
-sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mongod.conf
-VALIDATE $? "Editing MongoDB conf file for remote connections"
+mkdir -p /app 
+VALIDATE $? "Creating app directory"
 
-systemctl restart mongod &>>$LOG_FILE
-VALIDATE $? "Restarting MongoDB"
+curl -o /tmp/catalogue.zip https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip &>>$LOG_FILE
+VALIDATE $? "Downloading Catalogue"
+
+rm -rf /app/*
+cd /app 
+unzip /tmp/catalogue.zip &>>$LOG_FILE
+VALIDATE $? "unzipping catalogue"
+
+npm install &>>$LOG_FILE
+VALIDATE $? "Installing Dependencies"
+
+cp $SCRIPT_DIR/catalogue.service /etc/systemd/system/catalogue.service
+VALIDATE $? "Copying catalogue service"
+
+systemctl daemon-reload &>>$LOG_FILE
+systemctl enable catalogue  &>>$LOG_FILE
+systemctl start catalogue
+VALIDATE $? "Starting Catalogue"
+
+cp $SCRIPT_DIR/mongo.repo /etc/yum.repos.d/mongo.repo 
+dnf install mongodb-mongosh -y &>>$LOG_FILE
+VALIDATE $? "Installing MongoDB Client"
+
+STATUS=$(mongosh --host mongodb.daws84s.site --eval 'db.getMongo().getDBNames().indexOf("catalogue")')
+if [ $STATUS -lt 0 ]
+then
+    mongosh --host mongodb.daws84s.site </app/db/master-data.js &>>$LOG_FILE
+    VALIDATE $? "Loading data into MongoDB"
+else
+    echo -e "Data is already loaded ... $Y SKIPPING $N"
+fi
+
