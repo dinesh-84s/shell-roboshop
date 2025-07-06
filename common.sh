@@ -35,23 +35,23 @@ app_setup(){
     VALIDATE $? "unzipping $app_name"
 }
 
-nodejs_setup(){ 
-dnf module disable nodejs -y &>>$LOG_FILE
-VALIDATE $? "Disabling default nodejs"
+nodejs_setup(){
+    dnf module disable nodejs -y &>>$LOG_FILE
+    VALIDATE $? "Disabling default nodejs"
 
-dnf module enable nodejs:20 -y &>>$LOG_FILE
-VALIDATE $? "Enabling nodejs:20"
+    dnf module enable nodejs:20 -y &>>$LOG_FILE
+    VALIDATE $? "Enabling nodejs:20"
 
-dnf install nodejs -y &>>$LOG_FILE
-VALIDATE $? "Installing nodejs:20"
+    dnf install nodejs -y &>>$LOG_FILE
+    VALIDATE $? "Installing nodejs:20"
 
-npm install &>>$LOG_FILE
-VALIDATE $? "Installing Dependencies"
+    npm install &>>$LOG_FILE
+    VALIDATE $? "Installing Dependencies"
 }
 
 systemd_setup(){
     cp $SCRIPT_DIR/$app_name.service /etc/systemd/system/$app_name.service
-    VALIDATE $? "Copying app_name service"
+    VALIDATE $? "Copying $app_name service"
 
     systemctl daemon-reload &>>$LOG_FILE
     systemctl enable $app_name  &>>$LOG_FILE
@@ -60,13 +60,13 @@ systemd_setup(){
 }
 
 check_root(){
-if [ $USERID -ne 0 ]
-then
-    echo -e "$R ERROR:: Please run this script with root access $N" | tee -a $LOG_FILE
-    exit 1 #give other than 0 upto 127
-else
-    echo "You are running with root access" | tee -a $LOG_FILE
-fi
+    if [ $USERID -ne 0 ]
+    then
+        echo -e "$R ERROR:: Please run this script with root access $N" | tee -a $LOG_FILE
+        exit 1 #give other than 0 upto 127
+    else
+        echo "You are running with root access" | tee -a $LOG_FILE
+    fi
 }
 
 # validate functions takes input as exit status, what command they tried to install
